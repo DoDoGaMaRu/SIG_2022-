@@ -20,7 +20,7 @@ def createTokenJson(df, fileName) :
         tokenized_data.append(tokenized_music)
 
 
-    with open("../data/token//" + fileName + ".json", 'w', encoding="utf-8") as f:
+    with open("../../data/token/parts/" + fileName + ".json", 'w', encoding="utf-8") as f:
         json.dump(tokenized_data, f, ensure_ascii=False)
 
     del df
@@ -44,7 +44,7 @@ def getDataFrame(path) :
 
 
 def run(count, thread, size) :
-    df = getDataFrame("../data/dataFrame//musicDataFrame.json")
+    df = getDataFrame("../../data/dataFrame/musicDataFrame.json")
 
     print("\trun processes...")
     processes = []
@@ -67,7 +67,7 @@ def makeFile(thread, loop) :
 
     print("\tmerge token files...")
     for idx in tqdm(range(0, thread * loop + 1)) :
-        with open("../data/token/" + str(idx) + ".json", 'r', encoding="utf-8") as f:
+        with open("../../data/token/" + str(idx) + ".json", 'r', encoding="utf-8") as f:
             data = json.loads(f.read())
 
             token_full += data
@@ -75,7 +75,7 @@ def makeFile(thread, loop) :
             del f
 
     print("\tsave tokenized_data...")
-    with open("../data/token//tokenized_data.json", 'w', encoding="utf-8") as f:
+    with open("../../data/token/tokenized_data.json", 'w', encoding="utf-8") as f:
         json.dump(token_full, f, ensure_ascii=False)
 
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     loop = 14
 
     print("[check size...]")
-    df = getDataFrame("../data/dataFrame//musicDataFrame.json")
+    df = getDataFrame("../../data/dataFrame/musicDataFrame.json")
     full_size = len(df)
     size = full_size // thread // loop
     print("\tfull_size = " + str(full_size))
