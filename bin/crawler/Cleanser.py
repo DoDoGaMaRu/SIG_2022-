@@ -6,7 +6,7 @@ list = []
 data = ""
 
 print("\t[open...]")
-with open("../data/list//musicList.json", 'r', encoding="utf-8") as f:
+with open("../../data/list/musicList.json", 'r', encoding="utf-8") as f:
     data = json.load(f)
 print("\t[open complete]")
 
@@ -34,7 +34,7 @@ for idx in tqdm(range(0, end)):
 print("\t[cleansing complete]")
 
 print("\t[save...]")
-with open("../data/list//musicList.json", 'w', encoding="utf-8") as f:
+with open("../../data/list/musicList.json", 'w', encoding="utf-8") as f:
     json.dump(list, f, ensure_ascii=False)
 
 print("\t[save complete]")
