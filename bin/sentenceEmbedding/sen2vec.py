@@ -12,12 +12,10 @@ ZERO_VEC = np.zeros(embedding_dim)
 def sen2vec(tokenized_sentence):
     size = len(tokenized_sentence)
 
-
     sumOfVec = 0
     for word in tokenized_sentence :
         try :
             sumOfVec += model[word]
-            print(model[word])
         except KeyError:
             sumOfVec += ZERO_VEC
 
@@ -27,3 +25,6 @@ def sen2vec(tokenized_sentence):
         senVec = ZERO_VEC
 
     return senVec
+
+def getZeroVec():
+    return ZERO_VEC
