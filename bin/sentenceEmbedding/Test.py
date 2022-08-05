@@ -8,7 +8,7 @@ from konlpy.tag import Okt
 
 print("[sen2vec]")
 print("\tload model...")
-model = KeyedVectors.load_word2vec_format("../../data/model/testModel.model") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
+model = KeyedVectors.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg.model") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
 print("\tcomplete")
 
 embedding_dim = model.vectors.shape[1]
