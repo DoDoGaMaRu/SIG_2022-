@@ -36,7 +36,7 @@ def getMusic(musicNum):
         MusicName = title[1].strip()
         lyrics = lyricsSoup.getText().strip()
 
-        answer = {"musicNum":musicNum, 'artists':artists, "MusicName":MusicName, "lyrics":cleansing(lyrics)}
+        answer = {"musicNum":musicNum, 'artists':artists, "musicName":MusicName, "lyrics":cleansing(lyrics)}
     except AttributeError:
         answer = None
 
