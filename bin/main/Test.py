@@ -1,6 +1,5 @@
 import json
 import pandas as pd
-import numpy
 from gensim.models import KeyedVectors
 import numpy as np
 from bin.sentenceEmbedding.Sent2vec import sent2vec
@@ -8,7 +7,7 @@ from konlpy.tag import Okt
 
 print("[sentence vector data]")
 print("\tload model...")
-model = KeyedVectors.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg_100.model") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
+model = KeyedVectors.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg_part2.model", datatype=np.float16) #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
 print("\tcomplete")
 
 sentence = ""
@@ -29,7 +28,7 @@ def getDataFrame(path) :
     return df
 
 
-df = getDataFrame("../../data/dataFrame/musicDataFrame.json")
+df = getDataFrame("../../data/dataFrame/musicDataFrame2.json")
 
 while sentence != "0":
     sentence = input("Enter sentence : ")

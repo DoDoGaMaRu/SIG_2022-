@@ -11,6 +11,7 @@ print("개수 : " + str(len(train_data)))
 
 print("한글, 영어 외 문자 제거, 문장분리...")
 train_data['lyrics'] = train_data['lyrics'].str.replace("[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9 \n]","").str.split("\n")
+train_data = train_data.rename(columns={'MusicName':'musicName'})
 
 print("데이터 프레임 저장")
 train_data.to_json("../../data/dataFrame//musicDataFrame.json")
