@@ -67,7 +67,7 @@ def makeFile(thread, loop) :
 
     print("\tmerge token files...")
     for idx in tqdm(range(0, thread * loop + 1)) :
-        with open("../../data/token/" + str(idx) + ".json", 'r', encoding="utf-8") as f:
+        with open("../../data/token/parts/" + str(idx) + ".json", 'r', encoding="utf-8") as f:
             data = json.loads(f.read())
 
             token_full += data
@@ -82,7 +82,7 @@ def makeFile(thread, loop) :
 # main
 if __name__ == '__main__':
     thread = 16
-    loop = 14
+    loop = 10
 
     print("[check size...]")
     df = getDataFrame("../../data/dataFrame/musicDataFrame.json")

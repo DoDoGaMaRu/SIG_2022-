@@ -1,5 +1,6 @@
 import sys
 import itertools
+import numpy as np
 
 from numpy import (
     dot, float16 as REAL, double, zeros, vstack, ndarray,
@@ -9,7 +10,29 @@ from numpy import (
 from gensim import utils
 
 
-class keyedVec():
+class LyricsDB():
+    def __init__(self, vector_size, count=0, dtype=np.float16, mapfile_path=None):
+        self.vector_size = vector_size
+        self.index_to_key = [None] * count  # fka index2entity or index2word
+        self.next_index = 0  # pointer to where next new entry will land
+        self.key_to_index = {}
+
+        self.vectors = zeros((count, vector_size), dtype=dtype)  # formerly known as syn0
+        self.norms = None
+
+        # "expandos" are extra attributes stored for each key: {attribute_name} => numpy array of values of
+        # this attribute, with one array value for each vector key.
+        # The same information used to be stored in a structure called Vocab in Gensim <4.0.0, but
+        # with different indexing: {vector key} => Vocab object containing all attributes for the given vector key.
+        #
+        # Don't modify expandos directly; call set_vecattr()/get_vecattr() instead.
+        self.expandos = {}
+
+        self.mapfile_path = mapfile_path
+
+    def __str__(self):
+        return f"{self.__class__.__name__}<vector_size={self.vector_size}, {len(self)} keys>"
+
     @classmethod
     def load_word2vec_format(
             cls, fname, fvocab=None, binary=False, encoding='utf8', unicode_errors='strict',
