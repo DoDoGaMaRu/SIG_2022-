@@ -18,7 +18,7 @@ def getTokenizedData(idx):
 print("[convert vector]")
 
 vecData = []
-for idx in tqdm(range(0,20)): #225
+for idx in tqdm(range(185,225)): #225
     tokenData = getTokenizedData(idx)
 
     for lyrics in tokenData:
@@ -32,7 +32,7 @@ for idx in tqdm(range(0,20)): #225
 
 
 print("[create model]")
-with utils.open("../../data/s2vModel/music_s2v_5_sg_avg_20.model", 'wb') as f:
+with utils.open("../../data/s2vModel/music_s2v_5_sg_avg_-40.model", 'wb') as f:
     print("\tembedded lyrics file save...")
     f.write(f"{totalVec} {getDim()}\n".encode('utf8'))
 
