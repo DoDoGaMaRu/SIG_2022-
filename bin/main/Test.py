@@ -3,22 +3,18 @@ import pandas as pd
 import numpy
 from gensim.models import KeyedVectors
 import numpy as np
-from Sent2vec import sent2vec, getDim
+from bin.sentenceEmbedding.Sent2vec import sent2vec
 from konlpy.tag import Okt
 
-print("[sen2vec]")
+print("[sentence vector data]")
 print("\tload model...")
-model = KeyedVectors.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg.model") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
+model = KeyedVectors.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg_100.model") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
 print("\tcomplete")
-
-embedding_dim = model.vectors.shape[1]
-ZERO_VEC = np.zeros(embedding_dim)
 
 sentence = ""
 okt = Okt()
 
 simVecList = []
-
 def getDataFrame(path) :
     print("\topen dataFrame...")
     with open(path, 'r') as f:

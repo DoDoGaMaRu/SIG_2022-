@@ -1,8 +1,8 @@
 from gensim.models import KeyedVectors
 import numpy as np
 
-print("[sen2vec]")
-print("\tload model...")
+print("[Sent2vec]")
+print("\tload w2v model...")
 model = KeyedVectors.load_word2vec_format("../../data/model/music_w2v_100_5_sg.model") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
 print("\tcomplete")
 
