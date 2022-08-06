@@ -2,12 +2,32 @@ import sys
 import itertools
 import numpy as np
 
+
 from numpy import (
     dot, float16 as REAL, double, zeros, vstack, ndarray,
     sum as np_sum, prod, argmax, dtype, ascontiguousarray, frombuffer,
 )
 
-from gensim import utils
+from gensim import utils, matutils
+from numbers import Integral
+
+_KEY_TYPES = (str, int, np.integer)
+_EXTENDED_KEY_TYPES = (str, int, np.integer, np.ndarray)
+
+def _ensure_list(value):
+    """Ensure that the specified value is wrapped in a list, for those supported cases
+    where we also accept a single key or vector."""
+    if value is None:
+        return []
+
+    if isinstance(value, _KEY_TYPES) or (isinstance(value, ndarray) and len(value.shape) == 1):
+        return [value]
+
+    if isinstance(value, ndarray) and len(value.shape) == 2:
+        return list(value)
+
+    return value
+
 
 
 class LyricsDB():
@@ -30,8 +50,62 @@ class LyricsDB():
 
         self.mapfile_path = mapfile_path
 
+
+
     def __str__(self):
         return f"{self.__class__.__name__}<vector_size={self.vector_size}, {len(self)} keys>"
+
+    def most_similar(
+            self, positive=None, negative=None, topn=10, clip_start=0, clip_end=None,
+            restrict_vocab=None, indexer=None,
+        ):
+
+
+        if isinstance(topn, Integral) and topn < 1:
+            return []
+
+        # allow passing a single string-key or vector for the positive/negative arguments
+        positive = _ensure_list(positive)
+        negative = _ensure_list(negative)
+
+        self.fill_norms()
+        clip_end = clip_end or len(self.vectors)
+
+        if restrict_vocab:
+            clip_start = 0
+            clip_end = restrict_vocab
+
+        # add weights for each key, if not already present; default to 1.0 for positive and -1.0 for negative keys
+        keys = []
+        weight = np.concatenate((np.ones(len(positive)), -1.0 * np.ones(len(negative))))
+        for idx, item in enumerate(positive + negative):
+            if isinstance(item, _EXTENDED_KEY_TYPES):
+                keys.append(item)
+            else:
+                keys.append(item[0])
+                weight[idx] = item[1]
+
+        # compute the weighted average of all keys
+        mean = self.get_mean_vector(keys, weight, pre_normalize=True, post_normalize=True, ignore_missing=False)
+        all_keys = [
+            self.get_index(key) for key in keys if isinstance(key, _KEY_TYPES) and self.has_index_for(key)
+        ]
+
+        if indexer is not None and isinstance(topn, int):
+            return indexer.most_similar(mean, topn)
+
+        dists = dot(self.vectors[clip_start:clip_end], mean) / self.norms[clip_start:clip_end]
+        if not topn:
+            return dists
+        best = matutils.argsort(dists, topn=topn + len(all_keys), reverse=True)
+        # ignore (don't return) keys from the input
+        result = [
+            (self.index_to_key[sim + clip_start], float(dists[sim]))
+            for sim in best if (sim + clip_start) not in all_keys
+        ]
+        return result[:topn]
+
+
 
     @classmethod
     def load_word2vec_format(
