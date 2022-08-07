@@ -4,6 +4,11 @@ import multiprocessing
 from konlpy.tag import Okt
 from tqdm import tqdm
 
+dataFramePath = "../../data/dataFrame/musicDataFrame_300000.json"
+thread = 16
+loop = 8
+savePath = "../../data/token/tokenized_data_300000.json"
+partsSavePath = "../../data/token/parts/"
 
 def createTokenJson(df, fileName) :
     okt = Okt()
@@ -20,7 +25,7 @@ def createTokenJson(df, fileName) :
         tokenized_data.append(tokenized_music)
 
 
-    with open("../../data/token/parts/" + fileName + ".json", 'w', encoding="utf-8") as f:
+    with open(partsSavePath + fileName + ".json", 'w', encoding="utf-8") as f:
         json.dump(tokenized_data, f, ensure_ascii=False)
 
     del df
@@ -44,7 +49,7 @@ def getDataFrame(path) :
 
 
 def run(count, thread, size) :
-    df = getDataFrame("../../data/dataFrame/musicDataFrame.json")
+    df = getDataFrame(dataFramePath)
 
     print("\trun processes...")
     processes = []
@@ -75,17 +80,14 @@ def makeFile(thread, loop) :
             del f
 
     print("\tsave tokenized_data...")
-    with open("../../data/token/tokenized_data.json", 'w', encoding="utf-8") as f:
+    with open(savePath, 'w', encoding="utf-8") as f:
         json.dump(token_full, f, ensure_ascii=False)
 
 
 # main
 if __name__ == '__main__':
-    thread = 16
-    loop = 10
-
     print("[check size...]")
-    df = getDataFrame("../../data/dataFrame/musicDataFrame.json")
+    df = getDataFrame(dataFramePath)
     full_size = len(df)
     size = full_size // thread // loop
     print("\tfull_size = " + str(full_size))

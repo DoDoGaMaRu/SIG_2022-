@@ -1,20 +1,12 @@
 import json
 import pandas as pd
-from gensim.models import KeyedVectors
+from sent2vec_temp import vectorFinder
 import numpy as np
 from bin.sentenceEmbedding.Sent2vec import sent2vec
 from konlpy.tag import Okt
 
-print("[sentence vector data]")
-print("\tload model...")
-model = KeyedVectors.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg_300000.model", datatype=np.float16) #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
-print("\tcomplete")
 
-sentence = ""
-okt = Okt()
-
-simVecList = []
-def getDataFrame(path) :
+def loadDataFrame(path) :
     print("\topen dataFrame...")
     with open(path, 'r') as f:
         data = json.loads(f.read())
@@ -28,7 +20,16 @@ def getDataFrame(path) :
     return df
 
 
-df = getDataFrame("../../data/dataFrame/musicDataFrame_300000.json")
+
+print("[sentence vector data]")
+print("\tload model...")
+lyricsDB = vectorFinder.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg_short.model") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
+print("\tcomplete")
+
+print("[dataFrame]")
+df = loadDataFrame("../../data/dataFrame/musicDataFrame_short.json")
+okt = Okt()
+sentence = ""
 
 while sentence != "0":
     sentence = input("Enter sentence : ")
@@ -37,7 +38,7 @@ while sentence != "0":
     print(tokenized_sentence)
 
     vec = sent2vec(tokenized_sentence)
-    simVecList = model.most_similar(vec)
+    simVecList = lyricsDB.most_similar(vec)
 
     for simVec in simVecList:
         v = simVec[0].split(",")
