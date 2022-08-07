@@ -14,9 +14,8 @@ from numbers import Integral
 _KEY_TYPES = (str, int, np.integer)
 _EXTENDED_KEY_TYPES = (str, int, np.integer, np.ndarray)
 
-def _ensure_list(value):
-    """Ensure that the specified value is wrapped in a list, for those supported cases
-    where we also accept a single key or vector."""
+
+def _ensure_list(value):    #TODO 값 확인하고 형식 맞춰주는듯
     if value is None:
         return []
 
@@ -30,30 +29,227 @@ def _ensure_list(value):
 
 
 
-class LyricsDB():
+class vectorFinder(utils.SaveLoad):
     def __init__(self, vector_size, count=0, dtype=np.float16, mapfile_path=None):
         self.vector_size = vector_size
-        self.index_to_key = [None] * count  # fka index2entity or index2word
-        self.next_index = 0  # pointer to where next new entry will land
+        self.index_to_key = [None] * count
+        self.next_index = 0
         self.key_to_index = {}
 
-        self.vectors = zeros((count, vector_size), dtype=dtype)  # formerly known as syn0
+        self.vectors = zeros((count, vector_size), dtype=dtype)
         self.norms = None
-
-        # "expandos" are extra attributes stored for each key: {attribute_name} => numpy array of values of
-        # this attribute, with one array value for each vector key.
-        # The same information used to be stored in a structure called Vocab in Gensim <4.0.0, but
-        # with different indexing: {vector key} => Vocab object containing all attributes for the given vector key.
-        #
-        # Don't modify expandos directly; call set_vecattr()/get_vecattr() instead.
         self.expandos = {}
 
         self.mapfile_path = mapfile_path
 
-
-
     def __str__(self):
         return f"{self.__class__.__name__}<vector_size={self.vector_size}, {len(self)} keys>"
+
+    def __len__(self):
+        return len(self.index_to_key)
+
+    def __getitem__(self, key_or_keys):
+        if isinstance(key_or_keys, _KEY_TYPES):
+            return self.get_vector(key_or_keys)
+
+
+    def get_index(self, key, default=None):
+        """Return the integer index (slot/position) where the given key's vector is stored in the
+        backing vectors array.
+
+        """
+        val = self.key_to_index.get(key, -1)
+        if val >= 0:
+            return val
+        elif isinstance(key, (int, np.integer)) and 0 <= key < len(self.index_to_key):
+            return key
+        elif default is not None:
+            return default
+        else:
+            raise KeyError(f"Key '{key}' not present")
+
+    def has_index_for(self, key):
+        """Can this model return a single index for this key?
+
+        Subclasses that synthesize vectors for out-of-vocabulary words (like
+        :class:`~gensim.models.fasttext.FastText`) may respond True for a
+        simple `word in wv` (`__contains__()`) check but False for this
+        more-specific check.
+
+        """
+        return self.get_index(key, -1) >= 0
+
+
+
+    def add_vector(self, key, vector):
+        """Add one new vector at the given key, into existing slot if available.
+
+        Warning: using this repeatedly is inefficient, requiring a full reallocation & copy,
+        if this instance hasn't been preallocated to be ready for such incremental additions.
+
+        Parameters
+        ----------
+
+        key: str
+            Key identifier of the added vector.
+        vector: numpy.ndarray
+            1D numpy array with the vector values.
+
+        Returns
+        -------
+        int
+            Index of the newly added vector, so that ``self.vectors[result] == vector`` and
+            ``self.index_to_key[result] == key``.
+
+        """
+        target_index = self.next_index
+        if target_index >= len(self) or self.index_to_key[target_index] is not None:
+            # must append at end by expanding existing structures
+            target_index = len(self)
+            self.add_vectors([key], [vector])
+            self.allocate_vecattrs()  # grow any adjunct arrays
+            self.next_index = target_index + 1
+        else:
+            # can add to existing slot
+            self.index_to_key[target_index] = key
+            self.key_to_index[key] = target_index
+            self.vectors[target_index] = vector
+            self.next_index += 1
+        return target_index
+
+
+
+    def set_vecattr(self, key, attr, val):
+        """Set attribute associated with the given key to value.
+
+        Parameters
+        ----------
+
+        key : str
+            Store the attribute for this vector key.
+        attr : str
+            Name of the additional attribute to store for the given key.
+        val : object
+            Value of the additional attribute to store for the given key.
+
+        Returns
+        -------
+
+        None
+
+        """
+        self.allocate_vecattrs(attrs=[attr], types=[type(val)])
+        index = self.get_index(key)
+        self.expandos[attr][index] = val
+
+
+    def allocate_vecattrs(self, attrs=None, types=None):
+        """Ensure arrays for given per-vector extra-attribute names & types exist, at right size.
+
+        The length of the index_to_key list is canonical 'intended size' of KeyedVectors,
+        even if other properties (vectors array) hasn't yet been allocated or expanded.
+        So this allocation targets that size.
+
+        """
+        # with no arguments, adjust lengths of existing vecattr arrays to match length of index_to_key
+        if attrs is None:
+            attrs = list(self.expandos.keys())
+            types = [self.expandos[attr].dtype for attr in attrs]
+        target_size = len(self.index_to_key)
+        for attr, t in zip(attrs, types):
+            if t is int:
+                t = np.int64  # ensure 'int' type 64-bit (numpy-on-Windows https://github.com/numpy/numpy/issues/9464)
+            if t is str:
+                # Avoid typing numpy arrays as strings, because numpy would use its fixed-width `dtype=np.str_`
+                # dtype, which uses too much memory!
+                t = object
+            if attr not in self.expandos:
+                self.expandos[attr] = np.zeros(target_size, dtype=t)
+                continue
+            prev_expando = self.expandos[attr]
+            if not np.issubdtype(t, prev_expando.dtype):
+                raise TypeError(
+                    f"Can't allocate type {t} for attribute {attr}, "
+                    f"conflicts with its existing type {prev_expando.dtype}"
+                )
+            if len(prev_expando) == target_size:
+                continue  # no resizing necessary
+            prev_count = len(prev_expando)
+            self.expandos[attr] = np.zeros(target_size, dtype=prev_expando.dtype)
+            self.expandos[attr][: min(prev_count, target_size), ] = prev_expando[: min(prev_count, target_size), ]
+
+
+
+    def fill_norms(self, force=False):      #TODO 놈유효성 판단
+        if self.norms is None or force:
+            self.norms = np.linalg.norm(self.vectors, axis=1)
+
+    def get_mean_vector(self, keys, weights=None, pre_normalize=True, post_normalize=False, ignore_missing=True):
+        """Get the mean vector for a given list of keys.
+
+        Parameters
+        ----------
+
+        keys : list of (str or int or ndarray)
+            Keys specified by string or int ids or numpy array.
+        weights : list of float or numpy.ndarray, optional
+            1D array of same size of `keys` specifying the weight for each key.
+        pre_normalize : bool, optional
+            Flag indicating whether to normalize each keyvector before taking mean.
+            If False, individual keyvector will not be normalized.
+        post_normalize: bool, optional
+            Flag indicating whether to normalize the final mean vector.
+            If True, normalized mean vector will be return.
+        ignore_missing : bool, optional
+            If False, will raise error if a key doesn't exist in vocabulary.
+
+        Returns
+        -------
+
+        numpy.ndarray
+            Mean vector for the list of keys.
+
+        Raises
+        ------
+
+        ValueError
+            If the size of the list of `keys` and `weights` doesn't match.
+        KeyError
+            If any of the key doesn't exist in vocabulary and `ignore_missing` is false.
+
+        """
+        if len(keys) == 0:
+            raise ValueError("cannot compute mean with no input")
+        if isinstance(weights, list):
+            weights = np.array(weights)
+        if weights is None:
+            weights = np.ones(len(keys))
+        if len(keys) != weights.shape[0]:  # weights is a 1-D numpy array
+            raise ValueError(
+                "keys and weights array must have same number of elements"
+            )
+
+        mean = np.zeros(self.vector_size, self.vectors.dtype)
+
+        total_weight = 0
+        for idx, key in enumerate(keys):
+            if isinstance(key, ndarray):
+                mean += weights[idx] * key
+                total_weight += abs(weights[idx])
+            elif self.__contains__(key):
+                vec = self.get_vector(key, norm=pre_normalize)
+                mean += weights[idx] * vec
+                total_weight += abs(weights[idx])
+            elif not ignore_missing:
+                raise KeyError(f"Key '{key}' not present in vocabulary")
+
+        if(total_weight > 0):
+            mean = mean / total_weight
+        if post_normalize:
+            mean = matutils.unitvec(mean).astype(REAL)
+        return mean
+
+
 
     def most_similar(
             self, positive=None, negative=None, topn=10, clip_start=0, clip_end=None,
@@ -61,14 +257,14 @@ class LyricsDB():
         ):
 
 
-        if isinstance(topn, Integral) and topn < 1:
+        if isinstance(topn, Integral) and topn < 1: #topn이 숫자인지 확인
             return []
 
         # allow passing a single string-key or vector for the positive/negative arguments
         positive = _ensure_list(positive)
-        negative = _ensure_list(negative)
+        negative = _ensure_list(negative)           #TODO 필요없을거임
 
-        self.fill_norms()
+        self.fill_norms()                           #TODO 놈 유효성 판단 필요한지 모르겠음
         clip_end = clip_end or len(self.vectors)
 
         if restrict_vocab:
@@ -108,12 +304,12 @@ class LyricsDB():
 
 
     @classmethod
-    def load_word2vec_format(
-            cls, fname, fvocab=None, binary=False, encoding='utf8', unicode_errors='strict',
+    def load_word2vec_format(      #자신 객체 생성하는 거인듯
+            cls, fname, binary=False, encoding='utf8', unicode_errors='strict',
             limit=None, datatype=REAL, no_header=False,
     ):
         return _load_word2vec_format(
-            cls, fname, fvocab=fvocab, binary=binary, encoding=encoding, unicode_errors=unicode_errors,
+            cls, fname, binary=binary, encoding=encoding, unicode_errors=unicode_errors,
             limit=limit, datatype=datatype, no_header=no_header,
         )
 
@@ -218,17 +414,11 @@ def _word2vec_detect_sizes_text(fin, limit, datatype, unicode_errors, encoding):
     return vocab_size, vector_size
 
 def _load_word2vec_format(
-        cls, fname, fvocab=None, binary=False, encoding='utf8', unicode_errors='strict',
+        cls, fname, binary=False, encoding='utf8', unicode_errors='strict',
         limit=sys.maxsize, datatype=REAL, no_header=False, binary_chunk_size=100 * 1024,
-):
+    ):
 
     counts = None
-    if fvocab is not None:
-        counts = {}
-        with utils.open(fvocab, 'rb') as fin:
-            for line in fin:
-                word, count = utils.to_unicode(line, errors=unicode_errors).strip().split()
-                counts[word] = int(count)
 
     with utils.open(fname, 'rb') as fin:
         if no_header:
