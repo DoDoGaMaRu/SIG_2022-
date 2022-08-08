@@ -9,6 +9,9 @@ print("\tcomplete")
 embedding_dim = model.vectors.shape[1]
 ZERO_VEC = np.zeros(embedding_dim)
 
+def encode16bit(vec):
+    return np.array(vec, dtype=np.float16)
+
 def sen2vec(tokenized_sentence):
     size = len(tokenized_sentence)
 
@@ -24,7 +27,7 @@ def sen2vec(tokenized_sentence):
     except ZeroDivisionError:
         senVec = ZERO_VEC
 
-    return senVec
+    return encode16bit(senVec)
 
 def getZeroVec():
     return ZERO_VEC
