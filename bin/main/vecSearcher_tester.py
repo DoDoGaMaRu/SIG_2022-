@@ -1,8 +1,8 @@
 import json
 import pandas as pd
-from sent2vec_temp import vectorFinder
+from vectorSearcher import VectorSearcher
 import numpy as np
-from bin.sentenceEmbedding.Sent2vec import sent2vec
+from bin.sentenceEmbedding.sent2vec import Sent2vec
 from konlpy.tag import Okt
 
 
@@ -19,15 +19,16 @@ def loadDataFrame(path) :
 
     return df
 
-
+print("[Sent2vec]")
+s2v = Sent2vec("../../data/model/music_w2v_100_5_sg.model")
 
 print("[sentence vector data]")
-print("\tload model...")
-lyricsDB = vectorFinder.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg_short.model") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
+print("\tload data...")
+lyricsVS = VectorSearcher.load_word2vec_format("../../data/sentVecData/music_s2v_5_sg_avg_300000.file") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
 print("\tcomplete")
 
 print("[dataFrame]")
-df = loadDataFrame("../../data/dataFrame/musicDataFrame_short.json")
+df = loadDataFrame("../../data/dataFrame/musicDataFrame_300000.json")
 okt = Okt()
 sentence = ""
 
@@ -37,19 +38,17 @@ while sentence != "0":
     tokenized_sentence = okt.morphs(sentence, stem=True)
     print(tokenized_sentence)
 
-    vec = sent2vec(tokenized_sentence)
-    simVecList = lyricsDB.most_similar(vec)
+    vec = s2v.sent2vec(tokenized_sentence)
+    simVecList = lyricsVS.most_similar(vec)
 
     for simVec in simVecList:
-        v = simVec[0].split(",")
-        musicNum = v[0]
-        sentNum = int(v[1])
+        musicIdx, sentIdx = [int(x) for x in simVec[0].split(",")]
 
-        music = df.loc[musicNum]
+        music = df.loc[str(musicIdx)]
 
         musicName = music["musicName"]
         artists = music["artists"]
-        simSent = music["lyrics"][sentNum]
+        simSent = music["lyrics"][sentIdx]
 
         print(f"music \t\t: {musicName}")
         print(f"artists \t: {artists}")

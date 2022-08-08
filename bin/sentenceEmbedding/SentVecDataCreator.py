@@ -1,7 +1,7 @@
 import json
 import numpy as np
 from tqdm import tqdm
-from Sent2vec import sent2vec, getDim
+from sent2vec import sent2vec, getDim
 from gensim import utils
 
 
@@ -35,7 +35,7 @@ for idx in tqdm(range(0,129)):
 
 print("[create model]")
 
-with utils.open("../../data/s2vModel/music_s2v_5_sg_avg_300000.model", 'wb') as f:
+with utils.open("../../data/sentVecData/music_s2v_5_sg_avg_temp.file", 'wb') as f:
     print("\tembedded lyrics file save...")
     f.write(f"{totalVec} {getDim()}\n".encode('utf8'))
 
