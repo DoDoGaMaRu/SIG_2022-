@@ -19,8 +19,9 @@ del tokenized_data
 
 from gensim.models import Word2Vec
 print('make model...')
-model = Word2Vec(sentences = train_data, vector_size = 100, window = 2, min_count = 5, workers = 8, sg = 0)
+model = Word2Vec(sentences = train_data, vector_size = 100, window = 5, min_count = 5, workers = 8, sg = 1)
 
+del train_data
 print(model.wv.vectors.shape)
 
 print('save model...')
