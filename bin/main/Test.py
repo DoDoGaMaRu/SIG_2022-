@@ -7,7 +7,7 @@ from konlpy.tag import Okt
 
 print("[sentence vector data]")
 print("\tload model...")
-model = KeyedVectors.load_word2vec_format("../../data/sentVecData/music_s2v_5_sg_avg_300000.file", datatype=np.float16) #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
+model = KeyedVectors.load_word2vec_format("../../data/sentVecData/lyrics_vector_data_300000_avg.file", datatype=np.float16) #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
 print("\tcomplete")
 
 sentence = ""
