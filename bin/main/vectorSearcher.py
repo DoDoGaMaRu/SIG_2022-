@@ -66,6 +66,8 @@ class VectorSearcher(utils.SaveLoad):
     def load_word2vec_format(      #자신 객체 생성하는 거인듯
             cls, fname, encoding='utf8', unicode_errors='strict', datatype=REAL
     ):
+        print("[sentence vector data]")
+        print("\tload data...")
         return _load_word2vec_format(
             cls, fname, encoding=encoding, unicode_errors=unicode_errors, datatype=datatype,
         )
