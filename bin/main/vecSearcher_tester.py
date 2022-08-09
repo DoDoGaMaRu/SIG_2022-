@@ -1,9 +1,9 @@
 import json
 import pandas as pd
 from vectorSearcher import VectorSearcher
-import numpy as np
-from bin.sentenceEmbedding.sent2vec import Sent2vec
+from bin.sentenceEmbedding.sent2vec import Sent2vec as S2V
 from konlpy.tag import Okt
+
 
 
 def loadDataFrame(path) :
@@ -20,11 +20,11 @@ def loadDataFrame(path) :
     return df
 
 print("[Sent2vec]")
-s2v = Sent2vec("../../data/model/music_w2v_100_5_sg.model")
+s2v = S2V("../../data/model/music_w2v_100_5_sg.model")
 
 print("[sentence vector data]")
 print("\tload data...")
-lyricsVS = VectorSearcher.load_word2vec_format("../../data/sentVecData/music_s2v_5_sg_avg_300000.file") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
+lyricsVS = VectorSearcher.load_word2vec_format("../../data/sentVecData/lyrics_vector_data_300000_avg.file") #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
 print("\tcomplete")
 
 print("[dataFrame]")
