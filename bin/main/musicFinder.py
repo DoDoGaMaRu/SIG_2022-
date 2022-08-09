@@ -42,7 +42,7 @@ class MusicFinder():
         for sim_vec in sim_vec_list:
             music_idx, sent_idx = [int(x) for x in sim_vec[0].split(",")]
 
-            sim_music = self.df.loc[str(music_idx)]
+            sim_music = self.df.loc[str(music_idx)].copy()
             sim_music_num = int(sim_music["musicNum"])
 
             if sim_music["musicNum"] in sim_musicNum_list:
