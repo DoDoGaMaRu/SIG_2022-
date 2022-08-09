@@ -3,6 +3,7 @@ import numpy as np
 
 class Sent2vec:
     def __init__(self, w2v_path):
+        print("[Sent2vec]")
         print("\tload w2v model...")
         self.w2v_kv = self.load_w2v_model(w2v_path)
         self.embedding_dim = self.w2v_kv.vectors.shape[1]
