@@ -1,8 +1,8 @@
 import json
 import pandas as pd
 from model.vectorSearcher import VectorSearcher
-from crawler.youtubeCrawler import YoutubeCrawler
 from model.sent2vec import Sent2vec as S2V
+from crawler.youtubeCrawler import YoutubeCrawler
 from konlpy.tag import Okt
 
 class MusicFinder():
