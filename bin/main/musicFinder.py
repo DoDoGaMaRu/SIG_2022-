@@ -1,7 +1,8 @@
 import json
 import pandas as pd
-from vectorSearcher import VectorSearcher
-from bin.sentenceEmbedding.sent2vec import Sent2vec as S2V
+from model.vectorSearcher import VectorSearcher
+from crawler.youtubeCrawler import YoutubeCrawler
+from model.sent2vec import Sent2vec as S2V
 from konlpy.tag import Okt
 
 class MusicFinder():
@@ -13,6 +14,7 @@ class MusicFinder():
         self.okt = Okt()
         self.lyricsVS = VectorSearcher.load_word2vec_format(lyrics_vec_path)
         self.df = self.load_dataframe(df_path)
+        self.yt_crawler = YoutubeCrawler()
 
 
     def load_dataframe(self, path) :
@@ -51,8 +53,12 @@ class MusicFinder():
                         sim_music_list[idx]["simSentIdx"].append(sent_idx)
 
             elif len(sim_musicNum_list) < topn:
-                sim_musicNum_list.append(sim_music_num)
+                self.yt_crawler.search(sim_music["artists"] + " " + sim_music["musicName"])
+                sim_music["vidioUrl"] = self.yt_crawler.get_video_url()
+                sim_music["thumbnailUrl"] = self.yt_crawler.get_thumbnail_url()
                 sim_music["simSentIdx"] = [sent_idx]
+
+                sim_musicNum_list.append(sim_music_num)
                 sim_music_list.append(sim_music)
 
         return sim_music_list
