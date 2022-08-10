@@ -18,14 +18,18 @@ mf = MusicFinder(df_path=df_path, w2v_model_path=w2v_model_path, lyrics_vec_path
 sentence = ""
 while sentence != "0":
     sentence = input("Enter sentence : ")
-    music_list = mf.find_music(sentence, topn=15)        # TODO MusicFinder 객체 find_music 함수에 sentence 집어넣으면 딕셔너리 리스트 반환
+    music_list = mf.find_music(sentence, topn=10)        # TODO MusicFinder 객체 find_music 함수에 sentence 집어넣으면 딕셔너리 리스트 반환
 
     for music in music_list:
+        vidio_url = music["vidioUrl"]
+        vidio_thumbnail = music["thumbnailUrl"]
+
         music_name = music["musicName"]
         artists = music["artists"]
         sent_idx_list = music["simSentIdx"]
         simSent = [music["lyrics"][sentIdx] for sentIdx in sent_idx_list]
 
+        print(f"{vidio_url}\n{vidio_thumbnail}")
         print(f"music \t\t: {music_name}")
         print(f"artists \t: {artists}")
         print(f"비슷한 가사 \t: {simSent}\n")

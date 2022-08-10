@@ -48,10 +48,10 @@ class VectorSearcher(utils.SaveLoad):
         if isinstance(topn, Integral) and topn < 1:
             return []
 
-        self.fill_norms()                                           # 놈 유효성 판단하고 채워넣기
-        positive_vec = matutils.unitvec(positive_vec).astype(REAL)  # 정규화인데 필요한지 잘 모르겠음
+        self.fill_norms()
+        mean = matutils.unitvec(positive_vec).astype(REAL)  # 정규화인데 필요한지 잘 모르겠음
 
-        dists = dot(self.vectors, positive_vec) / self.norms
+        dists = dot(self.vectors, mean) / self.norms
         best = matutils.argsort(dists, topn=topn, reverse=True)
 
         result = [
@@ -63,7 +63,7 @@ class VectorSearcher(utils.SaveLoad):
 
 
     @classmethod
-    def load_word2vec_format(      #자신 객체 생성하는 거인듯
+    def load_word2vec_format(
             cls, fname, encoding='utf8', unicode_errors='strict', datatype=REAL
     ):
         print("[sentence vector data]")

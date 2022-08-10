@@ -1,7 +1,6 @@
 import json
-import numpy as np
 from tqdm import tqdm
-from sent2vec import Sent2vec as S2V
+from bin.main.model.sent2vec import Sent2vec as S2V
 from gensim import utils
 
 file_count = 129

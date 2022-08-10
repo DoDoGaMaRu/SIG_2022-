@@ -1,4 +1,4 @@
-from sent2vec import sent2vec
+from bin.main.model.sent2vec import sent2vec
 from konlpy.tag import Okt
 from numpy import dot
 from numpy.linalg import norm
