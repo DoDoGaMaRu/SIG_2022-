@@ -1,9 +1,11 @@
 import json
-import numpy as np
 from tqdm import tqdm
-from Sent2vec import sent2vec, getDim
+from bin.main.model.sent2vec import Sent2vec as S2V
 from gensim import utils
 
+file_count = 129
+file_path = "../../data/sentVecData/lyrics_vector_data_300000_avgFlow.file"
+s2v = S2V("../../data/model/music_w2v_100_5_sg.model")
 
 
 def getTokenizedData(idx):
@@ -19,13 +21,13 @@ print("[convert vector]")
 
 vecData = []
 totalVec = 0
-for idx in tqdm(range(0,129)):
+for idx in tqdm(range(0,file_count)):
     tokenData = getTokenizedData(idx)
 
     for lyrics in tokenData:
         lyricsVec = []
         for sentence in lyrics:
-            lyricsVec.append(sent2vec(sentence))
+            lyricsVec.append(s2v.sent2vec(sentence))
             totalVec += 1
         vecData.append(lyricsVec)
 
@@ -35,9 +37,9 @@ for idx in tqdm(range(0,129)):
 
 print("[create model]")
 
-with utils.open("../../data/s2vModel/music_s2v_5_sg_avg_300000.model", 'wb') as f:
+with utils.open(file_path, 'wb') as f:
     print("\tembedded lyrics file save...")
-    f.write(f"{totalVec} {getDim()}\n".encode('utf8'))
+    f.write(f"{totalVec} {s2v.get_dim()}\n".encode('utf8'))
 
     musicIdx = 0
     for lyrics in tqdm(vecData):

@@ -1,55 +1,35 @@
-import json
-import pandas as pd
-from gensim.models import KeyedVectors
-import numpy as np
-from bin.sentenceEmbedding.Sent2vec import sent2vec
-from konlpy.tag import Okt
+from musicFinder import MusicFinder
 
-print("[sentence vector data]")
-print("\tload model...")
-model = KeyedVectors.load_word2vec_format("../../data/s2vModel/music_s2v_5_sg_avg_300000.model", datatype=np.float16) #C:\Users\백대환\Desktop\IdeaProjects\SIG_2022하계\data\model\music_w2v
-print("\tcomplete")
+'''
+객체 생성시 데이터프레임(df_path), 워드투벡(w2v_model_path), 가사임베딩파일(lyrics_vec_path) 필요하며,
+같이 생성된 파일로 구성해야 함
+
+w2v_model 은 music_w2v_100_5_sg.model 사용
+'''
+
+
+df_path = "../../data/dataFrame/musicDataFrame_short.json"
+w2v_model_path = "../../data/model/music_w2v_100_5_sg.model"
+lyrics_vec_path = "../../data/sentVecData/lyrics_vector_data_short_avg.file"
+
+
+mf = MusicFinder(df_path=df_path, w2v_model_path=w2v_model_path, lyrics_vec_path=lyrics_vec_path)
 
 sentence = ""
-okt = Okt()
-
-simVecList = []
-def getDataFrame(path) :
-    print("\topen dataFrame...")
-    with open(path, 'r') as f:
-        data = json.loads(f.read())
-        del f
-    print("\topen complete")
-
-    print("\tmake table...")
-    df = pd.DataFrame(data)
-    del data
-
-    return df
-
-
-df = getDataFrame("../../data/dataFrame/musicDataFrame_300000.json")
-
 while sentence != "0":
     sentence = input("Enter sentence : ")
+    music_list = mf.find_music(sentence, topn=10)        # TODO MusicFinder 객체 find_music 함수에 sentence 집어넣으면 딕셔너리 리스트 반환
 
-    tokenized_sentence = okt.morphs(sentence, stem=True)
-    print(tokenized_sentence)
+    for music in music_list:
+        vidio_url = music["vidioUrl"]
+        vidio_thumbnail = music["thumbnailUrl"]
 
-    vec = sent2vec(tokenized_sentence)
-    simVecList = model.most_similar(vec)
-
-    for simVec in simVecList:
-        v = simVec[0].split(",")
-        musicNum = v[0]
-        sentNum = int(v[1])
-
-        music = df.loc[musicNum]
-
-        musicName = music["musicName"]
+        music_name = music["musicName"]
         artists = music["artists"]
-        simSent = music["lyrics"][sentNum]
+        sent_idx_list = music["simSentIdx"]
+        simSent = [music["lyrics"][sentIdx] for sentIdx in sent_idx_list]
 
-        print(f"music \t\t: {musicName}")
+        print(f"{vidio_url}\n{vidio_thumbnail}")
+        print(f"music \t\t: {music_name}")
         print(f"artists \t: {artists}")
         print(f"비슷한 가사 \t: {simSent}\n")
