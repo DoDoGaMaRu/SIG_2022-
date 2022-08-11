@@ -21,15 +21,15 @@ while sentence != "0":
     music_list = mf.find_music(sentence, topn=10)        # TODO MusicFinder 객체 find_music 함수에 sentence 집어넣으면 딕셔너리 리스트 반환
 
     for music in music_list:
-        vidio_url = music["vidioUrl"]
-        vidio_thumbnail = music["thumbnailUrl"]
+        video_url = music["videoUrl"]
+        video_thumbnail = music["thumbnailUrl"]
 
         music_name = music["musicName"]
         artists = music["artists"]
         sent_idx_list = music["simSentIdx"]
         simSent = [music["lyrics"][sentIdx] for sentIdx in sent_idx_list]
 
-        print(f"{vidio_url}\n{vidio_thumbnail}")
+        print(f"{video_url}\n{video_thumbnail}")
         print(f"music \t\t: {music_name}")
         print(f"artists \t: {artists}")
         print(f"비슷한 가사 \t: {simSent}\n")
