@@ -54,7 +54,7 @@ class MusicFinder():
 
             elif len(sim_musicNum_list) < topn:
                 self.yt_crawler.search(sim_music["artists"] + " " + sim_music["musicName"])
-                sim_music["vidioUrl"] = self.yt_crawler.get_video_url()
+                sim_music["videoUrl"] = self.yt_crawler.get_video_url()
                 sim_music["thumbnailUrl"] = self.yt_crawler.get_thumbnail_url()
                 sim_music["simSentIdx"] = [sent_idx]
 
