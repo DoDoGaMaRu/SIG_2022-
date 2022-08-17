@@ -1,0 +1,20 @@
+VectorSearcher 유클라디안 거리 유사도 비교
+
+    # TODO eucladean distance로 유사도 비교
+    def dist(self, x, y):
+        return np.sum((x-y)**2)
+
+    def most_similar_euclidean(self, positive_vec=None, topn=10):
+        if len(positive_vec) == 0:
+            raise ValueError("cannot compute mean with no input")
+        if isinstance(topn, Integral) and topn < 1:
+            return []
+
+        dists = [self.dist(vec, positive_vec) for vec in self.vectors]
+        best = matutils.argsort(dists, topn=topn)
+
+        result = [
+            (self.index_to_key[sim], float(dists[sim])) for sim in best
+        ]
+
+        return result

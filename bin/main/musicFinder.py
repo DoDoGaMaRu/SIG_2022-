@@ -36,7 +36,7 @@ class MusicFinder():
 
         sent_vec_topn = topn * 5
         target_vec = self.s2v.sent2vec(tokenized_sentence)
-        sim_vec_list = self.lyricsVS.most_similar(target_vec, topn=sent_vec_topn)     #TODO search 방법 변경
+        sim_vec_list = self.lyricsVS.most_similar(target_vec, topn=sent_vec_topn)
 
         sim_music_list = []
         sim_musicNum_list = []
@@ -52,9 +52,9 @@ class MusicFinder():
                         sim_music_list[idx]["simSentIdx"].append(sent_idx)
 
             elif len(sim_musicNum_list) < topn:
-                #self.yt_crawler.search(sim_music["artists"] + " " + sim_music["musicName"])    #유튜브 크롤러
-                #sim_music["videoUrl"] = self.yt_crawler.get_video_url()
-                #sim_music["thumbnailUrl"] = self.yt_crawler.get_thumbnail_url()
+                self.yt_crawler.search(sim_music["artists"] + " " + sim_music["musicName"])    #유튜브 크롤러
+                sim_music["videoUrl"] = self.yt_crawler.get_video_url()
+                sim_music["thumbnailUrl"] = self.yt_crawler.get_thumbnail_url()
                 sim_music["simSentIdx"] = [sent_idx]
 
                 sim_musicNum_list.append(sim_music_num)

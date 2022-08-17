@@ -1,4 +1,4 @@
-from musicFinder import MusicFinder
+from bin.main.musicFinder import MusicFinder
 from tqdm import tqdm
 import random
 import time
