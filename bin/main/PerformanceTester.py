@@ -3,9 +3,9 @@ from tqdm import tqdm
 import random
 import time
 
-df_path = "../../data/dataFrame/musicDataFrame_short.json"
+df_path = "../../data/dataFrame/musicDataFrame_300000.json"
 w2v_model_path = "../../data/model/music_w2v_100_5_sg.model"
-lyrics_vec_path = "../../data/sentVecData/lyrics_vector_data_short_avg.file"
+lyrics_vec_path = "../../data/sentVecData/lyrics_vector_data_300000_avg.file"
 
 
 mf = MusicFinder(df_path=df_path, w2v_model_path=w2v_model_path, lyrics_vec_path=lyrics_vec_path)
@@ -13,12 +13,12 @@ df = mf.df
 w2v_kv = mf.s2v.w2v_kv
 
 def get_random_sent(df_idx):
-    music = df.loc[str(df_idx)].copy()
-    lyrics = music["lyrics"]
-
     min_count = 5
     del_word_count = 2
     change_word_count = 2
+
+    music = df.loc[str(df_idx)].copy()
+    lyrics = music["lyrics"]
     result = None
 
     for sent in lyrics:                 # 5개 단어 이상의 문장 찾기
@@ -29,7 +29,7 @@ def get_random_sent(df_idx):
             break
 
     if result != None:
-        if random.choice([True, False]):    # n개의 단어 삭제
+        if random.choice([True, False]):    # n개의 단어 삭제/ 랜덤 -> random.choice([True, False])
             for count in range(0, del_word_count):
                 del_idx = random.randrange(0,len(result))
                 del result[del_idx]
@@ -51,7 +51,7 @@ def get_random_sent(df_idx):
 print("[Run performance test]")
 num_of_trials = 100
 
-for x in range(0, 5):
+for x in range(0, 1):
     sum_time = 0
     trials_count = num_of_trials
     success_count = 0
@@ -75,4 +75,5 @@ for x in range(0, 5):
 
     success_rate = success_count / trials_count * 100
     print(f"success rate : {success_rate}")
+    print(f"search avg time : {sum_time / trials_count}")
     print(f"time : {sum_time}")
