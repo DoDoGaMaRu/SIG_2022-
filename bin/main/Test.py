@@ -8,9 +8,9 @@ w2v_model 은 music_w2v_100_5_sg.model 사용
 '''
 
 
-df_path = "../../data/dataFrame/musicDataFrame_short.json"
+df_path = "../../data/dataFrame/musicDataFrame_300000.json"
 w2v_model_path = "../../data/model/music_w2v_100_5_sg.model"
-lyrics_vec_path = "../../data/sentVecData/lyrics_vector_data_short_avg.file"
+lyrics_vec_path = "../../data/sentVecData/lyrics_vector_data_300000_avg.file"
 
 
 mf = MusicFinder(df_path=df_path, w2v_model_path=w2v_model_path, lyrics_vec_path=lyrics_vec_path)
